@@ -8,6 +8,9 @@ from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_
 
 
 class Point:
+
+    collision_radius = 20
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -23,23 +26,24 @@ class Point:
         return f"({self.x}, {self.y})"
 
     def draw_collision_radius(self, window):
-        pygame.draw.circle(window, (255, 0, 0), (self.x, self.y), 20, 1)
+        pygame.draw.circle(window, (255, 0, 0), (self.x, self.y), self.collision_radius, 1)
 
     def get_random_velocity(self):
-        return random.randint(-2, 2), random.randint(-2, 2)
+        velocity_vector = random.randint(-1, 1), random.randint(-1, 1)
+        return velocity_vector[0] * 0.1, velocity_vector[1] * 0.1
+
 
     def move(self):
         self.x += self.velocity[0]
         self.y += self.velocity[1]
-        
-        if self.x < CANVAS_X_POSITION or self.x > CANVAS_X_POSITION + CANVAS_WIDTH:
+
+        if self.x - self.collision_radius < CANVAS_X_POSITION or self.x + self.collision_radius > CANVAS_X_POSITION + CANVAS_WIDTH:
             self.velocity = -self.velocity[0], self.velocity[1]
-        elif self.y < CANVAS_Y_POSITION or self.y > CANVAS_Y_POSITION + CANVAS_HEIGHT:
+
+        if self.y - self.collision_radius < CANVAS_Y_POSITION or self.y + self.collision_radius > CANVAS_Y_POSITION + CANVAS_HEIGHT:
             self.velocity = self.velocity[0], -self.velocity[1]
-        elif self.x < CANVAS_X_POSITION and self.y < CANVAS_Y_POSITION:
-            self.velocity = -self.velocity[0], -self.velocity[1]
-        else:
-            self.velocity = self.velocity[0], self.velocity[1]
+
+
 
 
 class Rectangle:

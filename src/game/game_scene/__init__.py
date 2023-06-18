@@ -7,10 +7,10 @@ from src.game.quadtree import Quadtree, Rectangle, Point
 class GameScene:
     def __init__(self, window):
         self.window = window
-        quadtree_boundaries = Rectangle(
+        self.quadtree_boundaries = Rectangle(
             CANVAS_X_POSITION, CANVAS_Y_POSITION, CANVAS_WIDTH, CANVAS_HEIGHT
         )
-        self.quadtree = Quadtree(self.window, quadtree_boundaries, 2)
+        self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 4)
         # self.quadtree.create_random_points(400)
 
         self.point_list = [
@@ -25,7 +25,21 @@ class GameScene:
             Point(330, 220),
             Point(330, 440),
             Point(320, 520),
-            Point(120, 640)
+            Point(120, 640),
+            Point(120, 640),
+            # Point(120, 640),
+            # Point(120, 650),
+            # Point(220, 650),
+            # Point(320, 650),
+            # Point(30, 740),
+            # Point(30, 740),
+            # Point(30, 740),
+            # Point(80, 740),
+            # Point(70, 740),
+            # Point(10, 740),
+            # Point(50, 740),
+            # Point(40, 740),
+            # Point(30, 740),
         ]
 
         for point in self.point_list:
@@ -47,18 +61,19 @@ class GameScene:
         # self.draw_dummy()
 
         while True:
-            
+            del self.quadtree
+            self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
+
+            for point in self.point_list:
+                self.quadtree.insert(point)
+
+
             self.window.fill((0, 0, 0))
 
             self.draw_canvas_border()
 
             self.quadtree.draw()
             # self.quadtree.print_quadtree()
-
-            self.quadtree.clear()
-
-            for point in self.point_list:
-                self.quadtree.insert(point)
 
             pygame.display.update()
 
