@@ -4,12 +4,12 @@ import logging
 
 import pygame
 
-from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION
+from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION, POINT_RADIUS, VELOCITY
 
 
 class Point:
 
-    collision_radius = 20
+    collision_radius = POINT_RADIUS
 
     def __init__(self, x, y):
         self.x = x
@@ -29,9 +29,11 @@ class Point:
         pygame.draw.circle(window, (255, 0, 0), (self.x, self.y), self.collision_radius, 1)
 
     def get_random_velocity(self):
-        velocity_vector = random.randint(-1, 1), random.randint(-1, 1)
-        return velocity_vector[0] * 0.1, velocity_vector[1] * 0.1
-
+        velocity_vector = (0, 0)
+        while velocity_vector == (0, 0):
+            velocity_vector = random.randint(-1, 1), random.randint(-1, 1)
+        
+        return velocity_vector[0] * VELOCITY, velocity_vector[1] * VELOCITY
 
     def move(self):
         self.x += self.velocity[0]
@@ -199,7 +201,7 @@ class Quadtree:
             else:
                 logging.error(f'No quadrant found for point {point}')
                 return False
-                
+
         logging.error(f'No quadrant found for point {point}')
         return False
 

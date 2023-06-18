@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION
+from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION, POINT_RADIUS, NUMBER_OF_POINTS
 from src.game.quadtree import Quadtree, Rectangle, Point
 
 
@@ -15,7 +15,7 @@ class GameScene:
         self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 4)
         # self.quadtree.create_random_points(400)
 
-        self.point_list = self.generate_point_list(20)
+        self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
 
         for point in self.point_list:
             self.quadtree.insert(point)
@@ -35,12 +35,22 @@ class GameScene:
             for point2 in point_list:
                 if point != point2:
                     if (
-                        point.x - point2.x < 20
-                        and point.x - point2.x > -20
-                        and point.y - point2.y < 20
-                        and point.y - point2.y > -20
+                        point.x - point2.x < POINT_RADIUS
+                        and point.x - point2.x > -POINT_RADIUS
+                        and point.y - point2.y < POINT_RADIUS
+                        and point.y - point2.y > -POINT_RADIUS
                     ):
                         point_list.remove(point2)
+
+        # verify if there are any points that are close to the border
+        for point in point_list:
+            if (
+                point.x - CANVAS_X_POSITION < POINT_RADIUS
+                or point.x - CANVAS_X_POSITION > CANVAS_WIDTH - POINT_RADIUS
+                or point.y - CANVAS_Y_POSITION < POINT_RADIUS
+                or point.y - CANVAS_Y_POSITION > CANVAS_HEIGHT - POINT_RADIUS
+            ):
+                point_list.remove(point)
 
         return point_list
 
