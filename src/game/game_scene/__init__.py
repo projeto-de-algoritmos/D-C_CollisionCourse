@@ -2,6 +2,7 @@ import pygame
 
 from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION
 from src.game.quadtree import Quadtree, Rectangle
+import logging
 
 
 class GameScene:
@@ -10,8 +11,9 @@ class GameScene:
         quadtree_boundaries = Rectangle(
             CANVAS_X_POSITION, CANVAS_Y_POSITION, CANVAS_WIDTH, CANVAS_HEIGHT
         )
-        self.quadtree = Quadtree(self.window, quadtree_boundaries, 1)
-        self.quadtree.create_random_points(100)
+        logging.debug(self.window)
+        self.quadtree = Quadtree(self.window, quadtree_boundaries, 8)
+        self.quadtree.create_uniform_points(300)
 
     def draw_dummy(self):
         pygame.draw.rect(self.window, (255, 0, 0), (0, 0, 100, 100))
