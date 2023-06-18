@@ -9,24 +9,24 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    logging.info('Initializing pygame...')
-    
+    logging.info("Initializing pygame...")
+
     try:
         pygame.init()
-        
+
         window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        
+
         while True:
             game_scene = GameScene(window)
-        
+
             game_scene.run()
-            
+
     except Exception as e:
         logging.exception(e)
         pygame.quit()
-        raise e            
-        
-        
-if __name__ == '__main__':
-    logging.info('Starting game...')
+        raise e
+
+
+if __name__ == "__main__":
+    logging.info("Starting game...")
     main()
