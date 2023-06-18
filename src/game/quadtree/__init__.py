@@ -21,39 +21,25 @@ class Rectangle:
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
+
         self.width = width
         self.height = height
 
-        self.left = x - width / 2
-        self.right = x + width / 2
-        self.top = y - height / 2
-        self.bottom = y + height / 2
-
     def contains(self, point):
         return (
-            point.x >= self.left
-            and point.x <= self.right
-            and point.y >= self.top
-            and point.y <= self.bottom
+            point.x >= self.x
+            and point.x <= self.x + self.width
+            and point.y >= self.y
+            and point.y <= self.y + self.height
         )
 
     def intersects(self, other):
         return not (
-            other.left > self.right
-            or other.right < self.left
-            or other.top > self.bottom
-            or other.bottom < self.top
+            self.x + self.width <= other.x
+            or self.y + self.height <= other.y
+            or self.x >= other.x + other.width
+            or self.y >= other.y + other.height
         )
-    
-    def subdivide(self, quadrant):
-        if quadrant == 'NE':
-            return Rectangle(self.x + self.width / 4, self.y - self.height / 4, self.width / 2, self.height / 2)
-        elif quadrant == 'NW':
-            return Rectangle(self.x - self.width / 4, self.y - self.height / 4, self.width / 2, self.height / 2)
-        elif quadrant == 'SE':
-            return Rectangle(self.x + self.width / 4, self.y + self.height / 4, self.width / 2, self.height / 2)
-        elif quadrant == 'SW':
-            return Rectangle(self.x - self.width / 4, self.y + self.height / 4, self.width / 2, self.height / 2)
         
     def __str__(self):
         return f"({self.x}, {self.y}, {self.width}, {self.height})"
@@ -70,55 +56,55 @@ class Quadtree:
     def subdivide(self):
         x = self.boundary.x
         y = self.boundary.y
+        width = self.boundary.width
+        height = self.boundary.height
 
-        self.northeast = Quadtree(
-            self.window,
-            self.boundary.subdivide('NE'),
-            self.capacity
-        )
         self.northwest = Quadtree(
             self.window,
-            self.boundary.subdivide('NW'),
-            self.capacity
+            Rectangle(x, y, math.ceil(width / 2), math.ceil(height / 2)),
+            self.capacity,
         )
-        self.southeast = Quadtree(
+        self.northeast = Quadtree(
             self.window,
-            self.boundary.subdivide('SE'),
-            self.capacity
+            Rectangle(
+                x + math.ceil(width / 2), y, math.ceil(width / 2), math.ceil(height / 2)
+            ),
+            self.capacity,
         )
         self.southwest = Quadtree(
             self.window,
-            self.boundary.subdivide('SW'),
-            self.capacity
+            Rectangle(
+                x,
+                y + math.ceil(height / 2),
+                math.ceil(width / 2),
+                math.ceil(height / 2),
+            ),
+            self.capacity,
         )
+        self.southeast = Quadtree(
+            self.window,
+            Rectangle(
+                x + math.ceil(width / 2),
+                y + math.ceil(height / 2),
+                math.ceil(width / 2),
+                math.ceil(height / 2),
+            ),
+            self.capacity,
+        )
+
+        for point in self.point_list:
+            if not (
+                self.northwest.insert(point) or
+                self.northeast.insert(point) or
+                self.southwest.insert(point) or
+                self.southeast.insert(point)
+            ):
+                logging.error(f'No quadrant found for point {point}')
+
+        self.point_list = []
+
         self.divided = True
-            
 
-    def insert(self, point):
-        if not self.boundary.contains(point):
-            logging.info(f"POINT OUTSIDE BOUNDARY: {point}")
-            logging.info(f"BOUNDARY: {self.boundary}")
-            return False
-
-        if len(self.point_list) < self.capacity:
-            self.point_list.append(point)
-            return True
-
-        else:
-            if not self.divided:
-                if len(self.point_list) < self.capacity:
-                    self.point_list.append(point)
-                    return True
-
-                self.subdivide()
-
-        return (
-            self.northeast.insert(point) or
-            self.northwest.insert(point) or
-            self.southeast.insert(point) or
-            self.southwest.insert(point)
-        )
-    
     def create_random_points(self, amount):
         for i in range(amount):
             self.insert(
@@ -157,19 +143,32 @@ class Quadtree:
             )
             print(f"Creating point at {coords}")
             self.insert(Point(abs(coords[0]), abs(coords[1])))
-    
-    def create_uniform_points(self, amount):
-        for i in range(amount):
-            coords = (
-                random.uniform(
-                    self.boundary.x, self.boundary.x + self.boundary.width
-                ),
-                random.uniform(
-                    self.boundary.y, self.boundary.y + self.boundary.height
-                ),
-            )
-            print(f"Creating point at {coords}")
-            self.insert(Point(abs(coords[0]), abs(coords[1])))
+
+    def insert(self, point):
+        if not self.boundary.contains(point):
+            logging.debug(f"POINT OUTSIDE BOUNDARY: {point}")
+            logging.debug(f"BOUNDARY: {self.boundary}")
+            return False
+
+        if len(self.point_list) < self.capacity and not self.divided:
+            self.point_list.append(point)
+            return True
+
+        else:
+            if not self.divided:
+                self.subdivide()
+
+            if self.northwest.insert(point):
+                return True
+            elif self.northeast.insert(point):
+                return True
+            elif self.southwest.insert(point):
+                return True
+            elif self.southeast.insert(point):
+                return True
+            else:
+                logging.error(f'No quadrant found for point {point}')
+                return False
 
     def draw(self):
         pygame.draw.rect(
