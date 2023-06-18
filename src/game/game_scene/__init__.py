@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION
@@ -13,34 +15,34 @@ class GameScene:
         self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 4)
         # self.quadtree.create_random_points(400)
 
-        self.point_list = [
-            Point(100, 100),
-            Point(200, 200),
-            Point(300, 300),
-            Point(320, 400),
-            Point(330, 500),
-            Point(340, 600),
-            Point(320, 720),
-            Point(320, 840),
-            Point(330, 220),
-            Point(330, 440),
-            Point(320, 520),
-            Point(120, 650),
-            Point(220, 650),
-            Point(320, 650),
-            Point(30, 840),
-            Point(30, 240),
-            Point(30, 340),
-            Point(80, 740),
-            Point(70, 740),
-            Point(10, 740),
-            Point(50, 740),
-            Point(40, 740),
-            Point(30, 740),
-        ]
+        self.point_list = self.generate_point_list(20)
 
         for point in self.point_list:
             self.quadtree.insert(point)
+
+    def generate_point_list(self, number_of_points):
+        point_list = []
+        for _ in range(number_of_points):
+            point_list.append(
+                Point(
+                    random.randint(CANVAS_X_POSITION, CANVAS_X_POSITION + CANVAS_WIDTH),
+                    random.randint(CANVAS_Y_POSITION, CANVAS_Y_POSITION + CANVAS_HEIGHT),
+                )
+            )
+
+        # verify if there are any points that are too close to each other
+        for point in point_list:
+            for point2 in point_list:
+                if point != point2:
+                    if (
+                        point.x - point2.x < 20
+                        and point.x - point2.x > -20
+                        and point.y - point2.y < 20
+                        and point.y - point2.y > -20
+                    ):
+                        point_list.remove(point2)
+
+        return point_list
 
     def draw_dummy(self):
         pygame.draw.rect(self.window, (255, 0, 0), (0, 0, 100, 100))
@@ -55,7 +57,10 @@ class GameScene:
         )
 
     def run(self):
+        clock = pygame.time.Clock()
         # self.draw_dummy()
+        font = pygame.font.Font(None, 30)
+        # clock.tick(60)
 
         while True:
             self.quadtree.clear()
@@ -67,6 +72,15 @@ class GameScene:
 
 
             self.window.fill((0, 0, 0))
+
+            # # Calculate FPS
+            # fps = clock.get_fps()
+
+            # # Render FPS
+            # fps_text = font.render("FPS: " + str(int(fps)), True, (255, 255, 255))  # The color is white.
+
+            # # Draw FPS
+            # self.window.blit(fps_text, (10, 10))  # Draw at position (10, 10).
 
             self.draw_canvas_border()
 
