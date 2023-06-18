@@ -27,9 +27,9 @@ class Rectangle:
 
     def contains(self, point):
         return (
-            point.x >= self.x - self.width
+            point.x >= self.x
             and point.x <= self.x + self.width
-            and point.y >= self.y - self.width
+            and point.y >= self.y
             and point.y <= self.y + self.height
         )
 
@@ -85,7 +85,7 @@ class Quadtree:
             self.window,
             Rectangle(
                 x + math.ceil(width / 2),
-                math.ceil(y + height / 2),
+                y + math.ceil(height / 2),
                 math.ceil(width / 2),
                 math.ceil(height / 2),
             ),
@@ -93,10 +93,13 @@ class Quadtree:
         )
 
         for point in self.point_list:
-            self.northwest.insert(point)
-            self.northeast.insert(point)
-            self.southwest.insert(point)
-            self.southeast.insert(point)
+            if not (
+                self.northwest.insert(point) or
+                self.northeast.insert(point) or
+                self.southwest.insert(point) or
+                self.southeast.insert(point)
+            ):
+                logging.error(f'No quadrant found for point {point}')
 
         self.point_list = []
 
@@ -147,7 +150,7 @@ class Quadtree:
             logging.debug(f"BOUNDARY: {self.boundary}")
             return False
 
-        if len(self.point_list) < self.capacity:
+        if len(self.point_list) < self.capacity and not self.divided:
             self.point_list.append(point)
             return True
 
@@ -163,6 +166,9 @@ class Quadtree:
                 return True
             elif self.southeast.insert(point):
                 return True
+            else:
+                logging.error(f'No quadrant found for point {point}')
+                return False
 
     def draw(self):
         pygame.draw.rect(
