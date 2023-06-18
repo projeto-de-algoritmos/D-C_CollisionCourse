@@ -4,17 +4,42 @@ import logging
 
 import pygame
 
+from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION
+
 
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
+        self.velocity = self.get_random_velocity()
+
     def draw(self, window):
-        pygame.draw.circle(window, (255, 255, 0), (self.x, self.y), 2)
+        pygame.draw.circle(window, (0, 255, 0), (self.x, self.y), 2)
+        self.draw_collision_radius(window)
+        self.move()
         
     def __str__(self):
         return f"({self.x}, {self.y})"
+
+    def draw_collision_radius(self, window):
+        pygame.draw.circle(window, (255, 0, 0), (self.x, self.y), 20, 1)
+
+    def get_random_velocity(self):
+        return random.randint(-2, 2), random.randint(-2, 2)
+
+    def move(self):
+        self.x += self.velocity[0]
+        self.y += self.velocity[1]
+        
+        if self.x < CANVAS_X_POSITION or self.x > CANVAS_X_POSITION + CANVAS_WIDTH:
+            self.velocity = -self.velocity[0], self.velocity[1]
+        elif self.y < CANVAS_Y_POSITION or self.y > CANVAS_Y_POSITION + CANVAS_HEIGHT:
+            self.velocity = self.velocity[0], -self.velocity[1]
+        elif self.x < CANVAS_X_POSITION and self.y < CANVAS_Y_POSITION:
+            self.velocity = -self.velocity[0], -self.velocity[1]
+        else:
+            self.velocity = self.velocity[0], self.velocity[1]
 
 
 class Rectangle:
@@ -169,6 +194,17 @@ class Quadtree:
             else:
                 logging.error(f'No quadrant found for point {point}')
                 return False
+
+    def clear(self):
+        self.point_list = []
+
+        if self.divided:
+            self.northwest.clear()
+            self.northeast.clear()
+            self.southwest.clear()
+            self.southeast.clear()
+
+        self.divided = False
 
     def draw(self):
         pygame.draw.rect(
