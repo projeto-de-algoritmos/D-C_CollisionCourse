@@ -27,9 +27,9 @@ class Rectangle:
 
     def contains(self, point):
         return (
-            point.x >= self.x
+            point.x >= self.x - self.width
             and point.x <= self.x + self.width
-            and point.y >= self.y
+            and point.y >= self.y - self.width
             and point.y <= self.y + self.height
         )
 
@@ -92,6 +92,14 @@ class Quadtree:
             self.capacity,
         )
 
+        for point in self.point_list:
+            self.northwest.insert(point)
+            self.northeast.insert(point)
+            self.southwest.insert(point)
+            self.southeast.insert(point)
+
+        self.point_list = []
+
         self.divided = True
 
     def create_random_points(self, amount):
@@ -135,8 +143,8 @@ class Quadtree:
 
     def insert(self, point):
         if not self.boundary.contains(point):
-            logging.info(f"POINT OUTSIDE BOUNDARY: {point}")
-            logging.info(f"BOUNDARY: {self.boundary}")
+            logging.debug(f"POINT OUTSIDE BOUNDARY: {point}")
+            logging.debug(f"BOUNDARY: {self.boundary}")
             return False
 
         if len(self.point_list) < self.capacity:
