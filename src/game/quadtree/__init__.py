@@ -122,13 +122,14 @@ class Quadtree:
         )
 
         for point in self.point_list:
-            if not (
-                self.northwest.insert(point) or
-                self.northeast.insert(point) or
-                self.southwest.insert(point) or
+            if self.northwest.boundary.contains(point):
+                self.northwest.insert(point)
+            if self.northeast.boundary.contains(point):
+                self.northeast.insert(point)
+            if self.southwest.boundary.contains(point):
+                self.southwest.insert(point)
+            if self.southeast.boundary.contains(point):
                 self.southeast.insert(point)
-            ):
-                logging.error(f'No quadrant found for point {point}')
 
         self.point_list = []
 
@@ -198,15 +199,22 @@ class Quadtree:
             else:
                 logging.error(f'No quadrant found for point {point}')
                 return False
+                
+        logging.error(f'No quadrant found for point {point}')
+        return False
 
     def clear(self):
         self.point_list = []
 
         if self.divided:
             self.northwest.clear()
+            del self.northwest
             self.northeast.clear()
+            del self.northeast
             self.southwest.clear()
+            del self.southwest
             self.southeast.clear()
+            del self.southeast
 
         self.divided = False
 

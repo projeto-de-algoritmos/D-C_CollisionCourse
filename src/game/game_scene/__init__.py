@@ -25,21 +25,18 @@ class GameScene:
             Point(330, 220),
             Point(330, 440),
             Point(320, 520),
-            Point(120, 640),
-            Point(120, 640),
-            # Point(120, 640),
-            # Point(120, 650),
-            # Point(220, 650),
-            # Point(320, 650),
-            # Point(30, 740),
-            # Point(30, 740),
-            # Point(30, 740),
-            # Point(80, 740),
-            # Point(70, 740),
-            # Point(10, 740),
-            # Point(50, 740),
-            # Point(40, 740),
-            # Point(30, 740),
+            Point(120, 650),
+            Point(220, 650),
+            Point(320, 650),
+            Point(30, 840),
+            Point(30, 240),
+            Point(30, 340),
+            Point(80, 740),
+            Point(70, 740),
+            Point(10, 740),
+            Point(50, 740),
+            Point(40, 740),
+            Point(30, 740),
         ]
 
         for point in self.point_list:
@@ -61,6 +58,7 @@ class GameScene:
         # self.draw_dummy()
 
         while True:
+            self.quadtree.clear()
             del self.quadtree
             self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
 
