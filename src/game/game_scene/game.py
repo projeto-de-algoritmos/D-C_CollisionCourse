@@ -118,8 +118,8 @@ class GameScene:
 
         while True:
             new_point = Point(
-                random.randint(CANVAS_X_POSITION, CANVAS_X_POSITION + CANVAS_WIDTH),
-                random.randint(CANVAS_Y_POSITION, CANVAS_Y_POSITION + CANVAS_HEIGHT),
+                random.randint(CANVAS_X_POSITION + (POINT_RADIUS * 2), CANVAS_X_POSITION + CANVAS_WIDTH - (POINT_RADIUS * 2)),
+                random.randint(CANVAS_Y_POSITION + (POINT_RADIUS * 2), CANVAS_Y_POSITION + CANVAS_HEIGHT - (POINT_RADIUS * 2)),
             )
             # Check if new point is far from existing points.
             spawn_region = Rectangle(new_point.x - new_point.danger_radius,
@@ -131,16 +131,15 @@ class GameScene:
             if not points_near_spawn:
                 break
 
-        for _ in range(3):  # Blinking 3 times
-            new_point.draw(window)
-            pygame.display.update()
-            time.sleep(0.5)  # Delay for half a second
-            window.fill((0, 0, 0))  # Clear screen
-            pygame.display.update()
-            time.sleep(0.5)  # Delay for half a second
+        
+        new_point.draw_spawn(window)
+        update_area = new_point.get_area_rect()
 
-        # After blinking, insert the new point into quadtree
-        quadtree.insert(new_point)
+        pygame.display.update(update_area)
+        
+        time.sleep(1)
+
+        return new_point
 
     def run(self):
         game_state = GameState.PLAYING
@@ -149,6 +148,14 @@ class GameScene:
         clock = pygame.time.Clock()
         
         font = pygame.font.Font(None, 30)
+
+        max_spawn_rate = 5 
+
+        last_spawn_time = time.time()
+
+        spawn_rate = GAME_SETTINGS.get("easy").get("spawn_rate") 
+
+        spawn_rate_increase = (max_spawn_rate - spawn_rate) / 600 
 
         while running:
             clock.tick(60)
@@ -197,6 +204,8 @@ class GameScene:
             # Draw point list size
             self.window.blit(point_list_size_text, (CANVAS_WIDTH + 10, 70))
 
+            current_time = time.time()
+            elapsed_time = current_time - last_spawn_time
 
             if game_state == GameState.PLAYING:
                 self.draw_canvas_border()
@@ -212,10 +221,15 @@ class GameScene:
                     self.game_over = GameOver(self.window, self.collision_point)
                     self.game_over.run()
                     return
-
+                
+                if elapsed_time >= 10/spawn_rate:  # It's time to spawn a new point
+                    game_state = GameState.SPAWNING
+                    last_spawn_time = current_time  # Reset the last spawn time
+                    spawn_rate = min(max_spawn_rate, spawn_rate + spawn_rate_increase * elapsed_time)
                 
             elif game_state == GameState.SPAWNING:
-                self.spawn_point()
+                new_point = self.spawn_point()
+                self.point_list.append(new_point)
                 game_state = GameState.PLAYING
 
 

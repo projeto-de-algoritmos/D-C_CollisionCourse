@@ -19,6 +19,6 @@ GAME_SETTINGS = {
         "number_of_points": 4,
         "velocity": 0.4,
         "generation_radius": 200,
-        "generation_factor": 0.5,
+        "spawn_rate": 1,
     }
 }
