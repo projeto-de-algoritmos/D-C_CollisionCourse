@@ -1,4 +1,4 @@
-WINDOW_WIDTH = 1000
+WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
 
 CANVAS_WIDTH = 700
@@ -11,3 +11,9 @@ NUMBER_OF_POINTS = 100
 POINT_RADIUS = 25
 VELOCITY = 0.8
 
+GAME_SETTINGS = {
+    "easy": {
+        "number_of_points": 4,
+        "velocity": 0.4,
+    }
+}

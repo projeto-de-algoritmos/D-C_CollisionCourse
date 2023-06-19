@@ -3,7 +3,16 @@ import random
 
 import pygame
 
-from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION, POINT_RADIUS, NUMBER_OF_POINTS, WINDOW_HEIGHT, WINDOW_WIDTH
+from src.config import (
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    CANVAS_X_POSITION,
+    CANVAS_Y_POSITION,
+    POINT_RADIUS,
+    NUMBER_OF_POINTS,
+    WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+)
 from src.game.quadtree import Quadtree, Rectangle, Point
 
 
@@ -29,7 +38,9 @@ class DemoGameScene:
             point_list.append(
                 Point(
                     random.randint(CANVAS_X_POSITION, CANVAS_X_POSITION + CANVAS_WIDTH),
-                    random.randint(CANVAS_Y_POSITION, CANVAS_Y_POSITION + CANVAS_HEIGHT),
+                    random.randint(
+                        CANVAS_Y_POSITION, CANVAS_Y_POSITION + CANVAS_HEIGHT
+                    ),
                 )
             )
 
@@ -73,7 +84,6 @@ class DemoGameScene:
         clock = pygame.time.Clock()
         # self.draw_dummy()
         font = pygame.font.Font(None, 30)
-        
 
         while True:
             clock.tick(60)
@@ -96,13 +106,17 @@ class DemoGameScene:
             fps = clock.get_fps()
 
             # Render FPS
-            fps_text = font.render("FPS: " + str(int(fps)), True, (0, 255, 0)) 
+            fps_text = font.render("FPS: " + str(int(fps)), True, (0, 255, 0))
 
             # Draw FPS
             self.window.blit(fps_text, (CANVAS_WIDTH + 10, 10))
 
             # Render checks per frame
-            checks_per_frame_text = font.render("Collision checks per frame: " + str(self.checks_per_frame), True, (0, 255, 0))
+            checks_per_frame_text = font.render(
+                "Collision checks per frame: " + str(self.checks_per_frame),
+                True,
+                (0, 255, 0),
+            )
 
             # Draw checks per frame
             self.window.blit(checks_per_frame_text, (CANVAS_WIDTH + 10, 40))
@@ -111,7 +125,9 @@ class DemoGameScene:
             self.checks_per_frame = 0
 
             # Render point list size
-            point_list_size_text = font.render("Amount of points: " + str(len(self.point_list)), True, (0, 255, 0))
+            point_list_size_text = font.render(
+                "Amount of points: " + str(len(self.point_list)), True, (0, 255, 0)
+            )
 
             # Draw point list size
             self.window.blit(point_list_size_text, (CANVAS_WIDTH + 10, 70))
@@ -123,7 +139,12 @@ class DemoGameScene:
 
             for point in self.point_list:
                 # Create a range around the airplane to check for collisions
-                range = Rectangle(point.x - point.collision_radius, point.y - point.collision_radius, point.collision_radius * 4, point.collision_radius * 4)
+                range = Rectangle(
+                    point.x - point.collision_radius,
+                    point.y - point.collision_radius,
+                    point.collision_radius * 4,
+                    point.collision_radius * 4,
+                )
 
                 # Query the quadtree for nearby airplanes
                 nearby = self.quadtree.query_range(range)
@@ -131,13 +152,17 @@ class DemoGameScene:
                 # Check for collisions with each nearby airplane
                 for other in nearby:
                     self.checks_per_frame += 1
-                    if point != other and math.hypot(point.x - other.x, point.y - other.y) < point.collision_radius + other.collision_radius:
+                    if (
+                        point != other
+                        and math.hypot(point.x - other.x, point.y - other.y)
+                        < point.collision_radius + other.collision_radius
+                    ):
                         # print(f"Collision detected between {point} and {other}")
                         point.collide(self.window)
                         other.collide(self.window)
-        
+
             pygame.display.update()
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()

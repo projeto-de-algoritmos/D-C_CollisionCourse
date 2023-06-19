@@ -4,11 +4,17 @@ import logging
 
 import pygame
 
-from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_X_POSITION, CANVAS_Y_POSITION, POINT_RADIUS, VELOCITY
+from src.config import (
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    CANVAS_X_POSITION,
+    CANVAS_Y_POSITION,
+    POINT_RADIUS,
+    VELOCITY,
+)
 
 
 class Point:
-
     collision_radius = POINT_RADIUS
 
     def __init__(self, x, y):
@@ -24,28 +30,36 @@ class Point:
 
     def collide(self, window):
         pygame.draw.circle(window, (255, 0, 255), (self.x, self.y), 4)
-        
+
     def __str__(self):
         return f"({self.x}, {self.y})"
 
     def draw_collision_radius(self, window):
-        pygame.draw.circle(window, (255, 0, 0), (self.x, self.y), self.collision_radius, 1)
+        pygame.draw.circle(
+            window, (255, 0, 0), (self.x, self.y), self.collision_radius, 1
+        )
 
     def get_random_velocity(self):
         velocity_vector = (0, 0)
         while velocity_vector == (0, 0):
             velocity_vector = random.randint(-1, 1), random.randint(-1, 1)
-        
+
         return velocity_vector[0] * VELOCITY, velocity_vector[1] * VELOCITY
 
     def move(self):
         self.x += self.velocity[0]
         self.y += self.velocity[1]
 
-        if self.x - self.collision_radius < CANVAS_X_POSITION or self.x + self.collision_radius > CANVAS_X_POSITION + CANVAS_WIDTH:
+        if (
+            self.x - self.collision_radius < CANVAS_X_POSITION
+            or self.x + self.collision_radius > CANVAS_X_POSITION + CANVAS_WIDTH
+        ):
             self.velocity = -self.velocity[0], self.velocity[1]
 
-        if self.y - self.collision_radius < CANVAS_Y_POSITION or self.y + self.collision_radius > CANVAS_Y_POSITION + CANVAS_HEIGHT:
+        if (
+            self.y - self.collision_radius < CANVAS_Y_POSITION
+            or self.y + self.collision_radius > CANVAS_Y_POSITION + CANVAS_HEIGHT
+        ):
             self.velocity = self.velocity[0], -self.velocity[1]
 
 
@@ -72,7 +86,7 @@ class Rectangle:
             or self.x >= other.x + other.width
             or self.y >= other.y + other.height
         )
-        
+
     def __str__(self):
         return f"({self.x}, {self.y}, {self.width}, {self.height})"
 
@@ -218,10 +232,10 @@ class Quadtree:
             elif self.southeast.insert(point):
                 return True
             else:
-                logging.error(f'No quadrant found for point {point}')
+                logging.error(f"No quadrant found for point {point}")
                 return False
 
-        logging.error(f'No quadrant found for point {point}')
+        logging.error(f"No quadrant found for point {point}")
         return False
 
     def clear(self):
