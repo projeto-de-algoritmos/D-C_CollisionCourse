@@ -21,6 +21,9 @@ class Point:
         pygame.draw.circle(window, (0, 255, 0), (self.x, self.y), 2)
         self.draw_collision_radius(window)
         self.move()
+
+    def collide(self, window):
+        pygame.draw.circle(window, (255, 0, 255), (self.x, self.y), 4)
         
     def __str__(self):
         return f"({self.x}, {self.y})"
@@ -44,8 +47,6 @@ class Point:
 
         if self.y - self.collision_radius < CANVAS_Y_POSITION or self.y + self.collision_radius > CANVAS_Y_POSITION + CANVAS_HEIGHT:
             self.velocity = self.velocity[0], -self.velocity[1]
-
-
 
 
 class Rectangle:
@@ -83,6 +84,24 @@ class Quadtree:
         self.boundary = boundary
         self.capacity = capacity
         self.divided = False
+
+    def query_range(self, range: Rectangle):
+        points = []
+
+        if not self.boundary.intersects(range):
+            return points
+
+        for point in self.point_list:
+            if range.contains(point):
+                points.append(point)
+
+        if self.divided:
+            points.extend(self.northwest.query_range(range))
+            points.extend(self.northeast.query_range(range))
+            points.extend(self.southwest.query_range(range))
+            points.extend(self.southeast.query_range(range))
+
+        return points
 
     def subdivide(self):
         x = self.boundary.x
