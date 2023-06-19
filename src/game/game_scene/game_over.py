@@ -1,6 +1,6 @@
 import pygame
 
-from src.config import CANVAS_HEIGHT, CANVAS_WIDTH
+from src.config import CANVAS_HEIGHT, CANVAS_WIDTH, HUD_X_POSITION, HUD_Y_POSITION
 
 
 class GameOver:
@@ -14,7 +14,7 @@ class GameOver:
 
         text = font.render("Game Over!", True, (0, 255, 0))
 
-        self.window.blit(text, (CANVAS_WIDTH + 10, 100))
+        self.window.blit(text, (HUD_X_POSITION, 100))
 
         pygame.display.update()
 

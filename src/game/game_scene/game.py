@@ -15,6 +15,9 @@ from src.config import (
     WINDOW_HEIGHT,
     WINDOW_WIDTH,
     GAME_SETTINGS,
+    HUD_X_POSITION,
+    HUD_Y_POSITION,
+    ASSETS_DIR
 )
 from src.game.quadtree import Quadtree, Rectangle, Point
 from src.game.game_scene.game_over import GameOver
@@ -44,6 +47,11 @@ class GameScene:
         self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
         for point in self.point_list:
             self.quadtree.insert(point)
+        
+        # load image texture
+        crt_texture = pygame.image.load(ASSETS_DIR + 'crt_scanlines.png').convert_alpha()
+        crt_texture.set_alpha(100)
+        self.crt_texture = pygame.transform.scale(crt_texture, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
     def generate_point_list(self, number_of_points):
         point_list = []
@@ -135,20 +143,48 @@ class GameScene:
         new_point.draw_spawn(window)
         update_area = new_point.get_area_rect()
 
-        pygame.display.update(update_area)
+        pygame.display.update()
         
         time.sleep(1)
 
         return new_point
 
+    def draw_hud(self, font, fps=0):
+        # Render FPS
+        fps_text = font.render("FPS: " + str(int(fps)), True, (0, 255, 0))
+
+        # Draw FPS
+        self.window.blit(fps_text, (HUD_X_POSITION, HUD_Y_POSITION))
+
+        # Render checks per frame
+        checks_per_frame_text = font.render(
+            "Collision checks per frame: " + str(self.checks_per_frame),
+            True,
+            (0, 255, 0),
+        )
+
+        # Draw checks per frame
+        self.window.blit(checks_per_frame_text, (HUD_X_POSITION, HUD_Y_POSITION + 25))
+
+        # Reset checks per frame
+        self.checks_per_frame = 0
+
+        # Render point list size
+        point_list_size_text = font.render(
+            "Amount of points: " + str(len(self.point_list)), True, (0, 255, 0)
+        )
+
+        # Draw point list size
+        self.window.blit(point_list_size_text, (HUD_X_POSITION, HUD_Y_POSITION + 50))
+
     def run(self):
         game_state = GameState.PLAYING
         running = True
 
-        clock = pygame.time.Clock()
-        
         font = pygame.font.Font(None, 30)
 
+        clock = pygame.time.Clock()
+        
         max_spawn_rate = 5 
 
         last_spawn_time = time.time()
@@ -167,6 +203,7 @@ class GameScene:
             # Build the quadtree
             self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
 
+
             # Insert the points into the quadtree
             for point in self.point_list:
                 self.quadtree.insert(point)
@@ -177,32 +214,7 @@ class GameScene:
             # Calculate FPS
             fps = clock.get_fps()
 
-            # Render FPS
-            fps_text = font.render("FPS: " + str(int(fps)), True, (0, 255, 0))
-
-            # Draw FPS
-            self.window.blit(fps_text, (CANVAS_WIDTH + 10, 10))
-
-            # Render checks per frame
-            checks_per_frame_text = font.render(
-                "Collision checks per frame: " + str(self.checks_per_frame),
-                True,
-                (0, 255, 0),
-            )
-
-            # Draw checks per frame
-            self.window.blit(checks_per_frame_text, (CANVAS_WIDTH + 10, 40))
-
-            # Reset checks per frame
-            self.checks_per_frame = 0
-
-            # Render point list size
-            point_list_size_text = font.render(
-                "Amount of points: " + str(len(self.point_list)), True, (0, 255, 0)
-            )
-
-            # Draw point list size
-            self.window.blit(point_list_size_text, (CANVAS_WIDTH + 10, 70))
+            self.draw_hud(font, fps)
 
             current_time = time.time()
             elapsed_time = current_time - last_spawn_time
@@ -214,6 +226,8 @@ class GameScene:
 
                 for point in self.point_list:
                     self.collision_point = self.check_collision(point) or self.collision_point
+
+                self.window.blit(self.crt_texture, (0, 0), special_flags = pygame.BLEND_ALPHA_SDL2)
                     
                 pygame.display.update()
 
