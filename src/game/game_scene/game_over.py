@@ -16,7 +16,7 @@ class GameOver:
 
         self.window.blit(text, (CANVAS_WIDTH + 10, 100))
 
-        pygame.display.update()
+        pygame.display.flip()
 
         while True:
             for event in pygame.event.get():

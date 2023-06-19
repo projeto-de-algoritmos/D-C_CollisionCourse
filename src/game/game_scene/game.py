@@ -3,7 +3,9 @@ import random
 import logging
 import time
 
+import moderngl
 import pygame
+from pygame.locals import *
 
 from src.config import (
     CANVAS_HEIGHT,
@@ -19,6 +21,50 @@ from src.config import (
 from src.game.quadtree import Quadtree, Rectangle, Point
 from src.game.game_scene.game_over import GameOver
 
+ctx = moderngl.create_context(standalone=True)
+
+# Shader programs
+prog = ctx.program(
+    vertex_shader='''
+        #version 330
+
+        in vec2 in_vert;
+        in vec3 in_color;
+
+        out vec3 color;
+
+        void main() {
+            gl_Position = vec4(in_vert, 0.0, 1.0);
+            color = in_color;
+        }
+    ''',
+    fragment_shader='''
+        #version 330
+
+        in vec3 color;
+
+        out vec4 fragColor;
+
+        uniform float time;
+        uniform vec2 resolution;
+
+        void main() {
+            float scanline = sin(gl_FragCoord.y * 3.14159 / 2.0 + time * 2.0) * 0.5 + 0.5;
+            fragColor = vec4(color * scanline, 1.0);
+        }
+    ''',
+)
+
+# Full screen rectangle vertices and colors
+vertices = ctx.buffer(
+    b'\x00\x00\x00\x00\xff\x00\x00' +  # Vertex 1: Position and color
+    b'\xff\x00\x00\x00\x00\xff\x00' +  # Vertex 2: Position and color
+    b'\xff\xff\x00\x00\x00\x00\xff' +  # Vertex 3: Position and color
+    b'\x00\xff\x00\x00\xff\xff\xff'    # Vertex 4: Position and color
+)
+
+# Vertex array object
+vao = ctx.simple_vertex_array(prog, vertices, 'in_vert', 'in_color')
 
 class GameState:
     PLAYING = 1
@@ -44,6 +90,8 @@ class GameScene:
         self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
         for point in self.point_list:
             self.quadtree.insert(point)
+
+
 
     def generate_point_list(self, number_of_points):
         point_list = []
@@ -135,7 +183,7 @@ class GameScene:
         new_point.draw_spawn(window)
         update_area = new_point.get_area_rect()
 
-        pygame.display.update(update_area)
+        pygame.display.flip()
         
         time.sleep(1)
 
@@ -159,6 +207,11 @@ class GameScene:
 
         while running:
             clock.tick(60)
+
+            # Set the uniform values
+            prog['time'].value = time.time()  # Pass the current time
+            prog['resolution'].value = (WINDOW_WIDTH, WINDOW_HEIGHT)  # Pass the window dimensions
+
 
             # Clear the quadtree
             self.quadtree.clear()
@@ -215,7 +268,7 @@ class GameScene:
                 for point in self.point_list:
                     self.collision_point = self.check_collision(point) or self.collision_point
                     
-                pygame.display.update()
+                pygame.display.flip()
 
                 if self.collision_point:
                     self.game_over = GameOver(self.window, self.collision_point)
