@@ -18,6 +18,8 @@ class GameScene:
 
         self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
 
+        self.checks_per_frame = 0
+
         for point in self.point_list:
             self.quadtree.insert(point)
 
@@ -76,14 +78,18 @@ class GameScene:
         while True:
             clock.tick(60)
 
+            # Clear the quadtree
             self.quadtree.clear()
             del self.quadtree
-            
+
+            # Build the quadtree
             self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
 
+            # Insert the points into the quadtree
             for point in self.point_list:
                 self.quadtree.insert(point)
 
+            # Clear the window
             self.window.fill((0, 0, 0))
 
             # Calculate FPS
@@ -94,6 +100,21 @@ class GameScene:
 
             # Draw FPS
             self.window.blit(fps_text, (CANVAS_WIDTH + 10, 10))
+
+            # Render checks per frame
+            checks_per_frame_text = font.render("Collision checks per frame: " + str(self.checks_per_frame), True, (0, 255, 0))
+
+            # Draw checks per frame
+            self.window.blit(checks_per_frame_text, (CANVAS_WIDTH + 10, 40))
+
+            # Reset checks per frame
+            self.checks_per_frame = 0
+
+            # Render point list size
+            point_list_size_text = font.render("Amount of points: " + str(len(self.point_list)), True, (0, 255, 0))
+
+            # Draw point list size
+            self.window.blit(point_list_size_text, (CANVAS_WIDTH + 10, 70))
 
             self.draw_canvas_border()
 
@@ -109,6 +130,7 @@ class GameScene:
 
                 # Check for collisions with each nearby airplane
                 for other in nearby:
+                    self.checks_per_frame += 1
                     if point != other and math.hypot(point.x - other.x, point.y - other.y) < point.collision_radius + other.collision_radius:
                         # print(f"Collision detected between {point} and {other}")
                         point.collide(self.window)
