@@ -18,8 +18,8 @@ def main():
         window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
         while True:
-            game_scene = GameScene(window)
-            # game_scene = DemoGameScene(window)
+            #game_scene = GameScene(window)
+            game_scene = DemoGameScene(window)
             game_scene.run()
 
     except Exception as e:
