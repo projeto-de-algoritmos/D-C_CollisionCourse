@@ -1,5 +1,6 @@
 import math
 import random
+import logging
 
 import pygame
 
@@ -15,6 +16,7 @@ from src.config import (
     GAME_SETTINGS,
 )
 from src.game.quadtree import Quadtree, Rectangle, Point
+from src.game.game_scene.game_over import GameOver
 
 
 class GameScene:
@@ -28,12 +30,10 @@ class GameScene:
             CANVAS_X_POSITION, CANVAS_Y_POSITION, CANVAS_WIDTH, CANVAS_HEIGHT
         )
         self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
-
         self.checks_per_frame = 0
-
-
         self.amount_of_points = GAME_SETTINGS.get("easy").get("number_of_points")
         self.generation_radius = GAME_SETTINGS.get("easy").get("generation_radius")
+        self.collision_point = None
 
         self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
         for point in self.point_list:
@@ -80,6 +80,31 @@ class GameScene:
             (CANVAS_X_POSITION, CANVAS_Y_POSITION, CANVAS_WIDTH, CANVAS_HEIGHT),
             1,
         )
+
+    def check_collision(self, point):
+        # Create a range around the airplane to check for collisions
+        range = Rectangle(
+            point.x - point.collision_radius,
+            point.y - point.collision_radius,
+            point.collision_radius * 4,
+            point.collision_radius * 4,
+        )
+
+        # Query the quadtree for nearby airplanes
+        nearby = self.quadtree.query_range(range)
+
+        # Check for collisions with each nearby airplane
+        for other in nearby:
+            self.checks_per_frame += 1
+            if (
+                point != other
+                and math.hypot(point.x - other.x, point.y - other.y)
+                < point.collision_radius + other.collision_radius
+            ):
+                logging.info(f"Collision detected between {point} and {other}")
+                point.collide(self.window)
+                other.collide(self.window)
+                return True
 
     def run(self):
         clock = pygame.time.Clock()
@@ -136,33 +161,16 @@ class GameScene:
             self.draw_canvas_border()
 
             self.quadtree.draw()
-            # self.quadtree.print_quadtree()
 
             for point in self.point_list:
-                # Create a range around the airplane to check for collisions
-                range = Rectangle(
-                    point.x - point.collision_radius,
-                    point.y - point.collision_radius,
-                    point.collision_radius * 4,
-                    point.collision_radius * 4,
-                )
-
-                # Query the quadtree for nearby airplanes
-                nearby = self.quadtree.query_range(range)
-
-                # Check for collisions with each nearby airplane
-                for other in nearby:
-                    self.checks_per_frame += 1
-                    if (
-                        point != other
-                        and math.hypot(point.x - other.x, point.y - other.y)
-                        < point.collision_radius + other.collision_radius
-                    ):
-                        # print(f"Collision detected between {point} and {other}")
-                        point.collide(self.window)
-                        other.collide(self.window)
-
+                self.collision_point = self.check_collision(point) or self.collision_point
+                
             pygame.display.update()
+
+            if self.collision_point:
+                self.game_over = GameOver(self.window, self.collision_point)
+                self.game_over.run()
+                return
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
