@@ -3,7 +3,7 @@ import logging
 import pygame
 
 from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
-from src.game.game_scene import GameScene
+from src.game.game_scene.demo import DemoGameScene
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,7 +17,7 @@ def main():
         window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
         while True:
-            game_scene = GameScene(window)
+            game_scene = DemoGameScene(window)
 
             game_scene.run()
 
