@@ -32,6 +32,19 @@ class Point:
         self.draw_collision_radius(window)
         self.draw_danger_radius(window)
         self.move()
+    
+    def draw_spawn(self, window):
+        pygame.draw.circle(window, (155, 0, 0), (self.x, self.y), 20)
+        self.draw_collision_radius(window)
+        self.draw_danger_radius(window)
+
+    def get_area_rect(self):
+        return pygame.Rect(
+            self.x - self.danger_radius,
+            self.y - self.danger_radius,
+            self.danger_radius * 2,
+            self.danger_radius * 2,
+        )
 
     def collide(self, window):
         pygame.draw.circle(window, (255, 0, 255), (self.x, self.y), 4)

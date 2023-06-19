@@ -19,7 +19,7 @@ def main():
 
         while True:
             game_scene = GameScene(window)
-            # game_scene = DemoGameScene(window)
+            #game_scene = DemoGameScene(window)
             game_scene.run()
 
     except Exception as e:

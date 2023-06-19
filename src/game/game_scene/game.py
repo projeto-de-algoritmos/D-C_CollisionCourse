@@ -1,6 +1,7 @@
 import math
 import random
 import logging
+import time
 
 import pygame
 
@@ -17,6 +18,11 @@ from src.config import (
 )
 from src.game.quadtree import Quadtree, Rectangle, Point
 from src.game.game_scene.game_over import GameOver
+
+
+class GameState:
+    PLAYING = 1
+    SPAWNING = 2
 
 
 class GameScene:
@@ -105,13 +111,53 @@ class GameScene:
                 point.collide(self.window)
                 other.collide(self.window)
                 return True
-
-    def run(self):
-        clock = pygame.time.Clock()
-        # self.draw_dummy()
-        font = pygame.font.Font(None, 30)
+            
+    def spawn_point(self):
+        quadtree = self.quadtree
+        window = self.window
 
         while True:
+            new_point = Point(
+                random.randint(CANVAS_X_POSITION + (POINT_RADIUS * 2), CANVAS_X_POSITION + CANVAS_WIDTH - (POINT_RADIUS * 2)),
+                random.randint(CANVAS_Y_POSITION + (POINT_RADIUS * 2), CANVAS_Y_POSITION + CANVAS_HEIGHT - (POINT_RADIUS * 2)),
+            )
+            # Check if new point is far from existing points.
+            spawn_region = Rectangle(new_point.x - new_point.danger_radius,
+                                    new_point.y - new_point.danger_radius,
+                                    2 * new_point.danger_radius,
+                                    2 * new_point.danger_radius)
+            points_near_spawn = quadtree.query_range(spawn_region)
+
+            if not points_near_spawn:
+                break
+
+        
+        new_point.draw_spawn(window)
+        update_area = new_point.get_area_rect()
+
+        pygame.display.update(update_area)
+        
+        time.sleep(1)
+
+        return new_point
+
+    def run(self):
+        game_state = GameState.PLAYING
+        running = True
+
+        clock = pygame.time.Clock()
+        
+        font = pygame.font.Font(None, 30)
+
+        max_spawn_rate = 5 
+
+        last_spawn_time = time.time()
+
+        spawn_rate = GAME_SETTINGS.get("easy").get("spawn_rate") 
+
+        spawn_rate_increase = (max_spawn_rate - spawn_rate) / 600 
+
+        while running:
             clock.tick(60)
 
             # Clear the quadtree
@@ -158,19 +204,34 @@ class GameScene:
             # Draw point list size
             self.window.blit(point_list_size_text, (CANVAS_WIDTH + 10, 70))
 
-            self.draw_canvas_border()
+            current_time = time.time()
+            elapsed_time = current_time - last_spawn_time
 
-            self.quadtree.draw()
+            if game_state == GameState.PLAYING:
+                self.draw_canvas_border()
 
-            for point in self.point_list:
-                self.collision_point = self.check_collision(point) or self.collision_point
+                self.quadtree.draw()
+
+                for point in self.point_list:
+                    self.collision_point = self.check_collision(point) or self.collision_point
+                    
+                pygame.display.update()
+
+                if self.collision_point:
+                    self.game_over = GameOver(self.window, self.collision_point)
+                    self.game_over.run()
+                    return
                 
-            pygame.display.update()
+                if elapsed_time >= 10/spawn_rate:  # It's time to spawn a new point
+                    game_state = GameState.SPAWNING
+                    last_spawn_time = current_time  # Reset the last spawn time
+                    spawn_rate = min(max_spawn_rate, spawn_rate + spawn_rate_increase * elapsed_time)
+                
+            elif game_state == GameState.SPAWNING:
+                new_point = self.spawn_point()
+                self.point_list.append(new_point)
+                game_state = GameState.PLAYING
 
-            if self.collision_point:
-                self.game_over = GameOver(self.window, self.collision_point)
-                self.game_over.run()
-                return
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
