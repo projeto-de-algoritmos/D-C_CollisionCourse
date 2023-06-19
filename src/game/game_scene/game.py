@@ -18,40 +18,35 @@ from src.game.quadtree import Quadtree, Rectangle, Point
 
 
 class GameScene:
+    
+    center_x = CANVAS_HEIGHT / 2
+    center_y = CANVAS_WIDTH / 2
+
     def __init__(self, window):
         self.window = window
         self.quadtree_boundaries = Rectangle(
             CANVAS_X_POSITION, CANVAS_Y_POSITION, CANVAS_WIDTH, CANVAS_HEIGHT
         )
         self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
-        # self.quadtree.create_random_points(400)
-
-        self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
 
         self.checks_per_frame = 0
 
+
+        self.amount_of_points = GAME_SETTINGS.get("easy").get("number_of_points")
+        self.generation_radius = GAME_SETTINGS.get("easy").get("generation_radius")
+
+        self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
         for point in self.point_list:
             self.quadtree.insert(point)
 
     def generate_point_list(self, number_of_points):
         point_list = []
-        for _ in range(number_of_points):
-            point_list.append(
-                Point(
-                    random.randint(CANVAS_X_POSITION, CANVAS_X_POSITION + CANVAS_WIDTH),
-                    random.randint(
-                        CANVAS_Y_POSITION, CANVAS_Y_POSITION + CANVAS_HEIGHT
-                    ),
-                )
-            )
-
-        radius = GAME_SETTINGS.get("easy").get("radius")
-
-        for i in range(N):
+        
+        for i in range(self.amount_of_points):
             # Calculate the angle, then the x and y coordinates
-            angle = i * 2 * math.pi / N
-            x = cx + radius * math.cos(angle)
-            y = cy + radius * math.sin(angle)
+            angle = i * 2 * math.pi / self.amount_of_points
+            x = self.center_x + self.generation_radius * math.cos(angle)
+            y = self.center_y + self.generation_radius * math.sin(angle)
             point_list.append(Point(x, y))
 
         # verify if there are any points that are too close to each other
@@ -173,3 +168,12 @@ class GameScene:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     return
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    clicked_region = Rectangle(mouse_pos[0] - Point.danger_radius, mouse_pos[1] - Point.danger_radius, 
+                                            2 * Point.danger_radius, 2 * Point.danger_radius)
+                    points_in_clicked_region = self.quadtree.query_range(clicked_region)
+                    for point in points_in_clicked_region:
+                        if point.is_within_danger_radius(mouse_pos):
+                            point.invert_velocity()
+

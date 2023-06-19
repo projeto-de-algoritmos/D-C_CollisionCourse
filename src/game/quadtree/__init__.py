@@ -11,11 +11,15 @@ from src.config import (
     CANVAS_Y_POSITION,
     POINT_RADIUS,
     VELOCITY,
+    INVALID_VELOCITIES,
+    VELOCITY_MAX_VALUE,
+    VELOCITY_MIN_VALUE
 )
 
 
 class Point:
     collision_radius = POINT_RADIUS
+    danger_radius = 2 * POINT_RADIUS
 
     def __init__(self, x, y):
         self.x = x
@@ -26,6 +30,7 @@ class Point:
     def draw(self, window):
         pygame.draw.circle(window, (0, 255, 0), (self.x, self.y), 2)
         self.draw_collision_radius(window)
+        self.draw_danger_radius(window)
         self.move()
 
     def collide(self, window):
@@ -34,15 +39,30 @@ class Point:
     def __str__(self):
         return f"({self.x}, {self.y})"
 
+    def draw_danger_radius(self, window):
+        pygame.draw.circle(
+            window, (0, 100, 0), (self.x, self.y), self.danger_radius, 1
+        )
+
     def draw_collision_radius(self, window):
         pygame.draw.circle(
             window, (255, 0, 0), (self.x, self.y), self.collision_radius, 1
         )
+    
+    def is_within_danger_radius(self, pos):
+        distance = math.sqrt((self.x - pos[0])**2 + (self.y - pos[1])**2)
+        return distance <= self.danger_radius
+
+    def invert_velocity(self):
+        self.velocity = (-self.velocity[0], -self.velocity[1])
 
     def get_random_velocity(self):
         velocity_vector = (0, 0)
-        while velocity_vector == (0, 0):
-            velocity_vector = random.randint(-1, 1), random.randint(-1, 1)
+        while velocity_vector in INVALID_VELOCITIES:
+            velocity_vector = (
+                random.uniform(VELOCITY_MIN_VALUE, VELOCITY_MAX_VALUE),
+                random.uniform(VELOCITY_MIN_VALUE, VELOCITY_MAX_VALUE)
+            )
 
         return velocity_vector[0] * VELOCITY, velocity_vector[1] * VELOCITY
 
