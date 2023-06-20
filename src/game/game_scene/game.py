@@ -151,7 +151,7 @@ class GameScene:
         new_point.draw_spawn(window)
         update_area = new_point.get_area_rect()
 
-        pygame.display.update()
+        pygame.display.update(update_area)
         
         time.sleep(1)
 
