@@ -1,6 +1,8 @@
 import logging
 
+import moderngl
 import pygame
+from pygame.locals import *
 
 from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
 from src.game.game_scene.demo import DemoGameScene

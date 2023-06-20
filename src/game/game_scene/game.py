@@ -43,6 +43,7 @@ class GameScene:
         self.amount_of_points = GAME_SETTINGS.get("easy").get("number_of_points")
         self.generation_radius = GAME_SETTINGS.get("easy").get("generation_radius")
         self.collision_point = None
+        self.start_ticks = pygame.time.get_ticks()
 
         self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
         for point in self.point_list:
@@ -52,6 +53,10 @@ class GameScene:
         crt_texture = pygame.image.load(ASSETS_DIR + 'crt_scanlines.png').convert_alpha()
         crt_texture.set_alpha(100)
         self.crt_texture = pygame.transform.scale(crt_texture, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
+        # load hud image
+        hud_image = pygame.image.load(ASSETS_DIR + 'hud.png').convert_alpha()
+        self.hud_image = pygame.transform.scale(hud_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
     def generate_point_list(self, number_of_points):
         point_list = []
@@ -151,37 +156,51 @@ class GameScene:
 
     def draw_hud(self, font, fps=0):
         # Render FPS
-        fps_text = font.render("FPS: " + str(int(fps)), True, (0, 255, 0))
+        fps_text = font.render(str(int(fps)), True, (0, 255, 0))
 
         # Draw FPS
-        self.window.blit(fps_text, (HUD_X_POSITION, HUD_Y_POSITION))
+        self.window.blit(fps_text, (790, 50))
 
         # Render checks per frame
         checks_per_frame_text = font.render(
-            "Collision checks per frame: " + str(self.checks_per_frame),
+            str(self.checks_per_frame),
             True,
             (0, 255, 0),
         )
 
         # Draw checks per frame
-        self.window.blit(checks_per_frame_text, (HUD_X_POSITION, HUD_Y_POSITION + 25))
+        self.window.blit(checks_per_frame_text, (790, 570))
 
         # Reset checks per frame
         self.checks_per_frame = 0
 
+        # Calculate the elapsed time
+        elapsed_ticks = pygame.time.get_ticks() - self.start_ticks
+        elapsed_seconds = elapsed_ticks // 1000  # Convert milliseconds to seconds
+
+        # Calculate minutes and seconds
+        minutes = elapsed_seconds // 60
+        seconds = elapsed_seconds % 60
+
+        time_text = font.render(f"{minutes:02}:{seconds:02}", True, (0, 200, 0))
+        self.window.blit(time_text, (1050, 50))
+
+
         # Render point list size
         point_list_size_text = font.render(
-            "Amount of points: " + str(len(self.point_list)), True, (0, 255, 0)
+            str(len(self.point_list)), True, (0, 255, 0)
         )
 
         # Draw point list size
-        self.window.blit(point_list_size_text, (HUD_X_POSITION, HUD_Y_POSITION + 50))
+        self.window.blit(point_list_size_text, (830, 690))
 
     def run(self):
+
+        self.start_ticks = pygame.time.get_ticks()
         game_state = GameState.PLAYING
         running = True
 
-        font = pygame.font.Font(None, 30)
+        font = pygame.font.Font(None, 42)
 
         clock = pygame.time.Clock()
         
@@ -228,7 +247,9 @@ class GameScene:
                     self.collision_point = self.check_collision(point) or self.collision_point
 
                 self.window.blit(self.crt_texture, (0, 0), special_flags = pygame.BLEND_ALPHA_SDL2)
-                    
+
+                self.window.blit(self.hud_image, (0, 0))
+
                 pygame.display.update()
 
                 if self.collision_point:
