@@ -33,19 +33,21 @@ class GameScene:
     center_x = CANVAS_HEIGHT / 2
     center_y = CANVAS_WIDTH / 2
 
-    def __init__(self, window):
+    def __init__(self, window, difficulty):
         self.window = window
         self.quadtree_boundaries = Rectangle(
             CANVAS_X_POSITION, CANVAS_Y_POSITION, CANVAS_WIDTH, CANVAS_HEIGHT
         )
         self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
         self.checks_per_frame = 0
-        self.amount_of_points = GAME_SETTINGS.get("easy").get("number_of_points")
-        self.generation_radius = GAME_SETTINGS.get("easy").get("generation_radius")
+        self.amount_of_points = GAME_SETTINGS.get(difficulty).get("number_of_points")
+        self.generation_radius = GAME_SETTINGS.get(difficulty).get("generation_radius")
         self.collision_point = None
         self.start_ticks = pygame.time.get_ticks()
 
-        self.point_list = self.generate_point_list(NUMBER_OF_POINTS)
+        self.difficulty = difficulty
+
+        self.point_list = self.generate_point_list()
         for point in self.point_list:
             self.quadtree.insert(point)
         
@@ -58,7 +60,7 @@ class GameScene:
         hud_image = pygame.image.load(ASSETS_DIR + 'hud.png').convert_alpha()
         self.hud_image = pygame.transform.scale(hud_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
-    def generate_point_list(self, number_of_points):
+    def generate_point_list(self):
         point_list = []
         
         for i in range(self.amount_of_points):
@@ -222,7 +224,6 @@ class GameScene:
             # Build the quadtree
             self.quadtree = Quadtree(self.window, self.quadtree_boundaries, 2)
 
-
             # Insert the points into the quadtree
             for point in self.point_list:
                 self.quadtree.insert(point)
@@ -254,8 +255,8 @@ class GameScene:
 
                 if self.collision_point:
                     self.game_over = GameOver(self.window, self.collision_point)
-                    self.game_over.run()
-                    return
+                    game_over_command = self.game_over.run()
+                    return game_over_command
                 
                 if elapsed_time >= 10/spawn_rate:  # It's time to spawn a new point
                     game_state = GameState.SPAWNING
