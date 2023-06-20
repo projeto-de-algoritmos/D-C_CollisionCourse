@@ -46,6 +46,7 @@ class GameScene:
         self.start_ticks = pygame.time.get_ticks()
 
         self.difficulty = difficulty
+        self.score = 0
 
         self.point_list = self.generate_point_list()
         for point in self.point_list:
@@ -156,7 +157,7 @@ class GameScene:
 
         return new_point
 
-    def draw_hud(self, font, fps=0):
+    def draw_hud(self, font, fps, elapsed_seconds, score, font_score):
         # Render FPS
         fps_text = font.render(str(int(fps)), True, (0, 255, 0))
 
@@ -176,10 +177,6 @@ class GameScene:
         # Reset checks per frame
         self.checks_per_frame = 0
 
-        # Calculate the elapsed time
-        elapsed_ticks = pygame.time.get_ticks() - self.start_ticks
-        elapsed_seconds = elapsed_ticks // 1000  # Convert milliseconds to seconds
-
         # Calculate minutes and seconds
         minutes = elapsed_seconds // 60
         seconds = elapsed_seconds % 60
@@ -196,6 +193,11 @@ class GameScene:
         # Draw point list size
         self.window.blit(point_list_size_text, (830, 690))
 
+        # render score
+        score_text = font_score.render(str(score), True, (0, 255, 0))
+        self.window.blit(score_text, (810, 140))
+
+    
     def run(self):
 
         self.start_ticks = pygame.time.get_ticks()
@@ -203,6 +205,8 @@ class GameScene:
         running = True
 
         font = pygame.font.Font(None, 42)
+
+        font_score = pygame.font.Font(None, 60)
 
         clock = pygame.time.Clock()
         
@@ -234,7 +238,13 @@ class GameScene:
             # Calculate FPS
             fps = clock.get_fps()
 
-            self.draw_hud(font, fps)
+            # Calculate the elapsed time
+            elapsed_ticks = pygame.time.get_ticks() - self.start_ticks
+            elapsed_seconds = elapsed_ticks // 1000  # Convert milliseconds to seconds
+            score = elapsed_seconds * len(self.point_list)
+
+            self.draw_hud(font, fps, elapsed_seconds, score, font_score)
+
 
             current_time = time.time()
             elapsed_time = current_time - last_spawn_time
