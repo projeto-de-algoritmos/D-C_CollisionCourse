@@ -23,7 +23,7 @@ ASSETS_DIR =  os.path.join(os.path.dirname(__file__) + "/../assets/")
 
 GAME_SETTINGS = {
     "easy": {
-        "number_of_points": 4,
+        "number_of_points": 10,
         "velocity": 0.4,
         "generation_radius": 200,
         "spawn_rate": 1,
