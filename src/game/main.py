@@ -2,6 +2,7 @@ import logging
 
 import moderngl
 import pygame
+import argparse
 from pygame.locals import *
 
 from src.config import WINDOW_WIDTH, WINDOW_HEIGHT
@@ -16,6 +17,13 @@ def main():
     logging.info("Initializing pygame...")
 
     game_over_command = 'menu'
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--demo', action='store_true')
+    args = parser.parse_args()
+
+    # true if --demo, false if not
+    print(args.demo)
 
     try:
         pygame.init()
