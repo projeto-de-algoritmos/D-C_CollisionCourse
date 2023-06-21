@@ -77,5 +77,3 @@ Na tela do jogo irá aparecer pontos com duas circunferências.
 A circunferência vermelha representa a área de colisão dos pontos, caso duas áreas de colisão se encontre o jogo é encerrado com Game Over.
 A circunferência verde representa a área de perigo dos pontos, essa área é clicável e caso seja clicada, irá inverter a velocidade de movimento do ponto clicado.
 
-## Outros 
-Quaisquer outras informações sobre seu projeto podem ser descritas abaixo.
