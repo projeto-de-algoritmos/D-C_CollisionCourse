@@ -9,6 +9,10 @@
 | 18/0016563  |  Filipe Santana Machado |
 | 18/0014412  |  Cainã Valença de Freitas |
 
+## Apresentação
+
+https://youtu.be/H_vvSo_VCSU
+
 ## Sobre 
 Este projeto implementa algoritmos de [Quadtree](https://en.wikipedia.org/wiki/Quadtree) para detectar colisão entre pontos que se movem em um campo de duas dimensões. A Quadtree segmenta o campo em quadrantes que são subdivididos recursivamente até atingir um limite específico de pontos por quadrante, permitindo que as verificações de colisão sejam realizadas apenas entre pontos no mesmo ou em quadrantes adjacentes. Isso reduz significativamente o número de comparações necessárias, tornando a detecção de colisões muito mais eficiente em termos computacionais.
 
