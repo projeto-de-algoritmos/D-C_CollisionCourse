@@ -23,7 +23,7 @@ def main():
     args = parser.parse_args()
 
     # true if --demo, false if not
-    print(args.demo)
+    demo = args.demo
 
     try:
         pygame.init()
@@ -31,12 +31,14 @@ def main():
         window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
         while True:
-            if game_over_command == 'menu':
-                menu = MenuScene(window)
-                difficulty = menu.run()
-
-            game_scene = GameScene(window, difficulty)
-            #game_scene = DemoGameScene(window)
+            if demo:
+                game_scene = DemoGameScene(window)
+            else:
+                if game_over_command == 'menu':
+                    menu = MenuScene(window)
+                    difficulty = menu.run()
+                game_scene = GameScene(window, difficulty)
+    
             game_over_command = game_scene.run()
             
 
