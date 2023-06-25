@@ -15,6 +15,8 @@ https://youtu.be/H_vvSo_VCSU
 
 Link de download: https://drive.google.com/file/d/1P751GaAcGtaqZH4Sm9N4esGgIp40Gejm/view?usp=sharing
 
+> Pelo motivo do vídeo ser maior que 25mb, o upload foi feito no google drive
+
 ## Sobre 
 Este projeto implementa algoritmos de [Quadtree](https://en.wikipedia.org/wiki/Quadtree) para detectar colisão entre pontos que se movem em um campo de duas dimensões. A Quadtree segmenta o campo em quadrantes que são subdivididos recursivamente até atingir um limite específico de pontos por quadrante, permitindo que as verificações de colisão sejam realizadas apenas entre pontos no mesmo ou em quadrantes adjacentes. Isso reduz significativamente o número de comparações necessárias, tornando a detecção de colisões muito mais eficiente em termos computacionais.
 
