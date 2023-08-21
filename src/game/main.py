@@ -1,6 +1,6 @@
 import logging
+import asyncio
 
-import moderngl
 import pygame
 import argparse
 from pygame.locals import *
@@ -13,7 +13,7 @@ from src.game.game_scene.menu_scene import MenuScene
 logging.basicConfig(level=logging.INFO)
 
 
-def main():
+async def main():
     logging.info("Initializing pygame...")
 
     game_over_command = 'menu'
@@ -38,9 +38,13 @@ def main():
                     menu = MenuScene(window)
                     difficulty = menu.run()
                 game_scene = GameScene(window, difficulty)
-    
+
             game_over_command = game_scene.run()
-            
+
+            await asyncio.sleep(0)
+
+            if game_over_command == 'quit':
+                return            
 
 
     except Exception as e:
@@ -49,6 +53,5 @@ def main():
         raise e
 
 
-if __name__ == "__main__":
-    logging.info("Starting game...")
-    main()
+logging.info("Starting game...")
+asyncio.run(main())
